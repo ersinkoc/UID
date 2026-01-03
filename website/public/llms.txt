@@ -1,0 +1,70 @@
+# UID
+
+> Zero-dependency unique ID generation with multiple algorithms
+
+## Install
+
+```bash
+npm install @oxog/uid
+```
+
+## Basic Usage
+
+```typescript
+import { uid } from '@oxog/uid';
+
+uid.uuid();     // '550e8400-e29b-41d4-a716-446655440000'
+uid.ulid();     // '01ARZ3NDEKTSV4RRFFQ69G5FAV'
+uid.nanoid();   // 'V1StGXR8_Z5jdHi6B-myT'
+```
+
+## API Summary
+
+### Kernel
+- `createUid(options?)` - Create custom instance
+- `use(plugin)` - Register plugin
+- `unregister(name)` - Remove plugin
+- `list()` - List plugins
+
+### Core Plugins
+- `uuid` - UUID v4/v7 generation
+- `ulid` - ULID generation (Crockford Base32)
+- `nanoid` - URL-safe IDs with custom alphabet
+
+### Optional Plugins
+- `cuid2` - Secure collision-resistant IDs
+- `snowflake` - Twitter-style 64-bit IDs
+- `short` - YouTube-style short IDs
+
+## Common Patterns
+
+### Generate Different ID Types
+
+```typescript
+uid.uuid();        // Standard UUID v4
+uid.uuid.v7();     // Time-sortable UUID v7
+uid.ulid();        // Sortable ULID
+uid.nanoid(10);    // 10-char NanoID
+```
+
+### Custom Alphabet
+
+```typescript
+const hexId = uid.nanoid.custom({
+  alphabet: '0123456789abcdef',
+  size: 16
+});
+hexId();  // 'a3f8b2c1e9d4f7a0'
+```
+
+### Validate IDs
+
+```typescript
+uid.uuid.isValid('550e8400-e29b-41d4-a716-446655440000'); // true
+uid.ulid.isValid('01ARZ3NDEKTSV4RRFFQ69G5FAV'); // true
+```
+
+## Links
+
+- Docs: https://uid.oxog.dev
+- GitHub: https://github.com/ersinkoc/uid
