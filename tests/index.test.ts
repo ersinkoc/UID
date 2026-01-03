@@ -4,7 +4,14 @@
 
 import { describe, it, expect } from 'vitest';
 import { uid, createUid } from '../src/index.js';
-import { uuidPlugin, ulidPlugin, nanoidPlugin } from '../src/plugins/index.js';
+import {
+  uuidPlugin,
+  ulidPlugin,
+  nanoidPlugin,
+  cuid2Plugin,
+  snowflakePlugin,
+  shortPlugin
+} from '../src/plugins/index.js';
 
 describe('Main Export', () => {
   describe('uid', () => {

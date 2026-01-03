@@ -30,7 +30,7 @@ export class Kernel<TContext extends UidContext = UidContext> implements UidKern
   private readonly plugins: Map<string, UidPlugin<TContext>>;
   private readonly context: TContext;
   private readonly apis: Map<string, unknown>;
-  private readonly random: RandomSource;
+  private readonly randomSource: RandomSource;
   private readonly debug: boolean;
 
   /**
@@ -42,7 +42,7 @@ export class Kernel<TContext extends UidContext = UidContext> implements UidKern
     this.plugins = new Map();
     this.apis = new Map();
     this.context = this.createContext();
-    this.random = options?.random ?? createRandomSource();
+    this.randomSource = options?.random ?? createRandomSource();
     this.debug = options?.debug ?? false;
   }
 
@@ -165,7 +165,7 @@ export class Kernel<TContext extends UidContext = UidContext> implements UidKern
    * ```
    */
   random(size: number): Uint8Array {
-    return this.random(size);
+    return this.randomSource(size);
   }
 
   /**

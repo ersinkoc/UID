@@ -104,10 +104,19 @@ describe('Snowflake Plugin', () => {
       expect(typeof id).toBe('bigint');
     });
 
-    it('should match string version', () => {
-      const strId = snowflake();
+    it('should be convertible to valid string', () => {
       const bigId = snowflake.bigint();
-      expect(bigId.toString()).toBe(strId);
+      const strVersion = bigId.toString();
+      expect(strVersion).toMatch(/^\d+$/);
+      expect(snowflake.isValid(strVersion)).toBe(true);
+    });
+
+    it('should generate unique bigints', () => {
+      const ids = new Set<bigint>();
+      for (let i = 0; i < 100; i++) {
+        ids.add(snowflake.bigint());
+      }
+      expect(ids.size).toBe(100);
     });
   });
 

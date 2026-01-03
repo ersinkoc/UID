@@ -26,6 +26,9 @@
 
 import { Kernel } from './kernel/kernel.js';
 import type { UidOptions, UidKernel } from './types.js';
+import type { UuidApi } from './plugins/uuid/index.js';
+import type { UlidApi } from './plugins/ulid/index.js';
+import type { NanoidApi } from './plugins/nanoid/index.js';
 
 // Import core plugins
 import { uuidPlugin } from './plugins/uuid/index.js';
@@ -33,10 +36,22 @@ import { ulidPlugin } from './plugins/ulid/index.js';
 import { nanoidPlugin } from './plugins/nanoid/index.js';
 
 /**
+ * UID instance with API accessors.
+ */
+export interface UidInstance extends UidKernel {
+  /** UUID generation API */
+  uuid: UuidApi;
+  /** ULID generation API */
+  ulid: UlidApi;
+  /** NanoID generation API */
+  nanoid: NanoidApi;
+}
+
+/**
  * Create a custom UID instance with optional configuration.
  *
  * @param options - Kernel configuration options
- * @returns UID kernel instance
+ * @returns UID instance with API accessors
  *
  * @example
  * ```ts
@@ -53,7 +68,7 @@ import { nanoidPlugin } from './plugins/nanoid/index.js';
  * myUid.ulid();
  * ```
  */
-export function createUid(options?: UidOptions): UidKernel {
+export function createUid(options?: UidOptions): UidInstance {
   const kernel = new Kernel(options);
 
   // Load core plugins
@@ -61,7 +76,26 @@ export function createUid(options?: UidOptions): UidKernel {
   kernel.use(ulidPlugin);
   kernel.use(nanoidPlugin);
 
-  return kernel;
+  // Create instance with API accessors
+  const instance = kernel as unknown as UidInstance;
+
+  // Define API getters
+  Object.defineProperty(instance, 'uuid', {
+    get: () => kernel.getApi<UuidApi>('uuid'),
+    enumerable: true
+  });
+
+  Object.defineProperty(instance, 'ulid', {
+    get: () => kernel.getApi<UlidApi>('ulid'),
+    enumerable: true
+  });
+
+  Object.defineProperty(instance, 'nanoid', {
+    get: () => kernel.getApi<NanoidApi>('nanoid'),
+    enumerable: true
+  });
+
+  return instance;
 }
 
 /**

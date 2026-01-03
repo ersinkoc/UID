@@ -42,3 +42,6 @@ website/build/
 tmp/
 temp/
 *.tmp
+
+# Playwright MCP
+.playwright-mcp/

@@ -52,8 +52,8 @@ export function hexToByte(hex: string): number {
  */
 export function numberToBytes(num: bigint, bytes: number): Uint8Array {
   const result = new Uint8Array(bytes);
-  for (let i = bytes - 1; i >= 0; i--) {
-    result[i] = Number((num >> BigInt(i * 8)) & 0xffn);
+  for (let i = 0; i < bytes; i++) {
+    result[i] = Number((num >> BigInt((bytes - 1 - i) * 8)) & 0xffn);
   }
   return result;
 }

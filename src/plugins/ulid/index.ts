@@ -14,7 +14,7 @@ const CROCKFORD_BASE32 = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 
 // Monotonic state
 let lastTime = 0;
-let lastRandom = 0;
+let lastRandomBytes: Uint8Array | null = null;
 
 /**
  * Encode a timestamp into Crockford Base32.
@@ -30,7 +30,7 @@ function encodeTime(timestamp: number, length: number): string {
   for (let i = length - 1; i >= 0; i--) {
     const shift = BigInt(i * 5);
     const index = Number((ts >> shift) & 0x1fn);
-    chars.unshift(CROCKFORD_BASE32[index]);
+    chars.push(CROCKFORD_BASE32[index]);
   }
 
   return chars.join('');
@@ -86,33 +86,32 @@ function generateUlid(kernel: UidKernel, timestamp?: number): string {
  * Generate a monotonic ULID (guaranteed increasing within same millisecond).
  *
  * @param kernel - Kernel instance
- * @param getState - Function to get/set state
  * @returns ULID string
  */
-function generateMonotonicUlid(
-  kernel: UidKernel,
-  getState: () => { now: number; lastRandom: number }
-): string {
-  const { now, lastRandom: lr } = getState();
-
+function generateMonotonicUlid(kernel: UidKernel): string {
+  const now = Date.now();
   const timePart = encodeTime(now, 10);
 
-  // Generate random bytes
-  const randomBytes = kernel.random(10);
+  let randomBytes: Uint8Array;
 
-  // If same millisecond, increment random part
-  if (now === lastTime && lr > 0) {
-    // Increment the random bytes
+  // If same millisecond and we have previous random bytes, increment them
+  if (now === lastTime && lastRandomBytes !== null) {
+    // Copy previous bytes and increment
+    randomBytes = new Uint8Array(lastRandomBytes);
     let carry = 1;
     for (let i = randomBytes.length - 1; i >= 0 && carry > 0; i--) {
-      const val = randomBytes[i] + carry;
+      const val = randomBytes[i]! + carry;
       randomBytes[i] = val & 0xff;
       carry = val >> 8;
     }
+  } else {
+    // New millisecond or first call - generate fresh random bytes
+    randomBytes = kernel.random(10);
   }
 
+  // Store state for next call
   lastTime = now;
-  lastRandom = lr + 1;
+  lastRandomBytes = new Uint8Array(randomBytes);
 
   const randomPart = encodeBase(randomBytes, CROCKFORD_BASE32).slice(0, 16);
 
@@ -237,20 +236,12 @@ export const ulidPlugin: UidPlugin = {
   install(kernel) {
     // Reset monotonic state
     lastTime = 0;
-    lastRandom = 0;
+    lastRandomBytes = null;
 
     const api = ((opts?: { timestamp?: number }) =>
       generateUlid(kernel, opts?.timestamp)) as UlidApi;
 
-    api.monotonic = () =>
-      generateMonotonicUlid(kernel, () => {
-        const now = Date.now();
-        if (now !== lastTime) {
-          lastTime = now;
-          lastRandom = 0;
-        }
-        return { now, lastRandom };
-      });
+    api.monotonic = () => generateMonotonicUlid(kernel);
 
     api.isValid = isValidUlid;
     api.timestamp = extractTimestamp;

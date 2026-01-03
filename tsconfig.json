@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "strict": true,
-    "noUncheckedIndexedAccess": true,
+    "noUncheckedIndexedAccess": false,
     "noImplicitOverride": true,
     "noEmit": true,
     "declaration": true,

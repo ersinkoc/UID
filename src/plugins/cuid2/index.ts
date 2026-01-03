@@ -51,11 +51,10 @@ function createFingerprint(): string {
   // Node.js: use process info
   if (typeof process !== 'undefined') {
     const pid = process.pid ? (process.pid % 1000).toString(36) : '0';
-    const hostname = (process.env.HOSTNAME || process.env.COMPUTERNAME || 'node').slice(
-      0,
-      3
-    );
-    return hostname + pid;
+    const hostname = (process.env.HOSTNAME || process.env.COMPUTERNAME || 'node')
+      .toLowerCase()
+      .slice(0, 3);
+    return (hostname + pid).toLowerCase();
   }
 
   // Fallback: random
@@ -83,18 +82,17 @@ function generateCuid2(
   validateSize(length, MIN_LENGTH, MAX_LENGTH);
 
   // First letter (ensures ID starts with letter)
-  const firstLetter = LETTERS[Math.floor(Math.random() * LETTERS.length)];
+  const firstLetter = LETTERS[Math.floor(Math.random() * LETTERS.length)]!;
 
   // Timestamp (base36, ~8 chars for current timestamps)
   const timestamp = Date.now().toString(36);
 
-  // Random part
-  const randomLength = Math.max(8, length - firstLetter.length - timestamp.length - fingerprint.length);
-  const randomBytes = kernel.random(Math.ceil(randomLength * 0.75));
+  // Random part - need enough bytes for full length
+  const randomLength = Math.max(8, length - 1 - timestamp.length - fingerprint.length);
+  const randomBytes = kernel.random(randomLength);
   let randomStr = '';
-  for (const byte of randomBytes) {
-    randomStr += ALPHABET[byte % 36];
-    if (randomStr.length >= randomLength) break;
+  for (let i = 0; i < randomLength; i++) {
+    randomStr += ALPHABET[randomBytes[i] % 36];
   }
 
   // Combine and trim to length
@@ -175,29 +173,35 @@ export interface Cuid2Api {
  * kernel.use(cuid2Plugin);
  * ```
  */
-export const cuid2Plugin: UidPlugin = {
-  name: 'cuid2',
-  version: '1.0.0',
+/**
+ * Create the CUID2 plugin.
+ */
+function createCuid2Plugin(): UidPlugin {
+  let fingerprint = createFingerprint();
 
-  install(kernel) {
-    let fingerprint = createFingerprint();
+  return {
+    name: 'cuid2',
+    version: '1.0.0',
 
-    const api = ((opts?: Cuid2Options) => {
-      const length = opts?.length ?? DEFAULT_LENGTH;
-      const fp = opts?.fingerprint ?? fingerprint;
-      return generateCuid2(kernel, length, fp);
-    }) as Cuid2Api;
+    install(kernel) {
+      const api = ((opts?: Cuid2Options) => {
+        const length = opts?.length ?? DEFAULT_LENGTH;
+        const fp = opts?.fingerprint ?? fingerprint;
+        return generateCuid2(kernel, length, fp);
+      }) as Cuid2Api;
 
-    api.isValid = isValidCuid2;
+      api.isValid = isValidCuid2;
 
-    // Initialize fingerprint
-    api.onInit = (context) => {
+      kernel.registerApi('cuid2', api);
+    },
+
+    onInit(context) {
       const fp = context.config.get('cuid2-fingerprint');
       if (typeof fp === 'string') {
         fingerprint = fp;
       }
-    };
+    }
+  };
+}
 
-    kernel.registerApi('cuid2', api);
-  }
-};
+export const cuid2Plugin: UidPlugin = createCuid2Plugin();

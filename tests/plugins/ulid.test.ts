@@ -97,7 +97,9 @@ describe('ULID Plugin', () => {
 
   describe('Crockford Base32 encoding', () => {
     it('should not include confusing characters', () => {
-      const confusing = ['0', 'O', 'I', 'l'];
+      // Crockford Base32 excludes: I, L, O, U (confusing with 1, 1, 0, V)
+      // Note: '0' (zero) IS included in Crockford Base32
+      const confusing = ['I', 'L', 'O', 'U'];
       const id = ulid();
 
       for (const char of confusing) {

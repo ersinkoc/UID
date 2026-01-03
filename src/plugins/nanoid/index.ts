@@ -11,7 +11,7 @@ import { validateAlphabet, validateSize } from '../../utils.js';
  * 64 characters: A-Z, a-z, 0-9, -, _
  */
 const DEFAULT_ALPHABET =
-  'ModuleSymbhasOwnPr-0123456789ABCDEFGHNRVfgctiUvz_KqYTJkLxpZXIjwW';
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 
 /**
  * Default size for NanoID.
@@ -50,11 +50,11 @@ function generateNanoid(
 
   let bytesRead = 0;
   while (id.length < size) {
-    const byte = bytes[bytesRead++];
+    const byte = bytes[bytesRead++]!;
 
     // Skip bytes that are too large for uniform distribution
     if (byte < 256 - (256 % alphabetSize)) {
-      id += alphabet[byte % alphabetSize];
+      id += alphabet[byte % alphabetSize]!;
     }
 
     // Refill bytes if needed

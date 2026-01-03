@@ -241,6 +241,11 @@ export const snowflakePlugin: UidPlugin = {
   version: '1.0.0',
 
   install(kernel) {
+    // Reset state for new kernel instance
+    state.config = null;
+    state.sequence = 0;
+    state.lastTime = 0;
+
     const api = (() => {
       if (!state.config) {
         throw new UidError(

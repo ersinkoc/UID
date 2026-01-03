@@ -49,7 +49,7 @@ describe('bytesToNumber', () => {
   it('should convert bytes to number', () => {
     expect(bytesToNumber(new Uint8Array([0, 0]))).toBe(0n);
     expect(bytesToNumber(new Uint8Array([0, 255]))).toBe(255n);
-    expect(bytesToNumber(new Uint8Array([18, 52]))).toBe(4692n);
+    expect(bytesToNumber(new Uint8Array([18, 52]))).toBe(4660n); // 0x1234 = 4660
     expect(bytesToNumber(new Uint8Array([1, 0, 0]))).toBe(65536n);
   });
 });

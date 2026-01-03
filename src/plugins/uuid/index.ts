@@ -21,9 +21,9 @@ function generateV4(kernel: UidKernel): string {
   const bytes = kernel.random(16);
 
   // Version 4 (random)
-  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[6] = (bytes[6]! & 0x0f) | 0x40;
   // Variant RFC4122
-  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  bytes[8] = (bytes[8]! & 0x3f) | 0x80;
 
   return formatUuid(bytes);
 }
@@ -48,18 +48,18 @@ function generateV7(kernel: UidKernel, timestamp?: number): string {
   const bytes = new Uint8Array(16);
 
   // Timestamp: 48 bits (big-endian)
-  for (let i = 5; i >= 0; i--) {
-    bytes[i] = Number((ts >> BigInt(i * 8)) & 0xffn);
+  for (let i = 0; i < 6; i++) {
+    bytes[i] = Number((ts >> BigInt((5 - i) * 8)) & 0xffn);
   }
 
   // Version and variant
-  bytes[6] = (bytes[6] & 0x0f) | 0x70; // Version 7
-  bytes[8] = (bytes[8] & 0x3f) | 0x80; // Variant RFC4122
+  bytes[6] = (bytes[6]! & 0x0f) | 0x70; // Version 7
+  bytes[8] = (bytes[8]! & 0x3f) | 0x80; // Variant RFC4122
 
   // Random bits
-  bytes[6] = (bytes[6] & 0xf0) | (random[0] & 0x0f);
-  bytes[7] = random[1];
-  bytes[8] = (bytes[8] & 0xc0) | (random[2] & 0x3f);
+  bytes[6] = (bytes[6]! & 0xf0) | (random[0]! & 0x0f);
+  bytes[7] = random[1]!;
+  bytes[8] = (bytes[8]! & 0xc0) | (random[2]! & 0x3f);
   bytes.set(random.slice(3), 9);
 
   return formatUuid(bytes);
@@ -100,15 +100,21 @@ function parseUuid(id: string): UuidParsed | null {
   }
 
   // Get version from bits 4-7 of byte 6
-  const version = (bytes[6] >> 4) & 0x0f;
+  const version = (bytes[6]! >> 4) & 0x0f;
 
-  // Get variant from bits 6-7 of byte 8
-  const variantBits = bytes[8] >> 6;
+  // Get variant from high bits of byte 8
+  // RFC 4122: 10xxxxxx = RFC4122, 0xxxxxxx = NCS, 110xxxxx = Microsoft, 111xxxxx = Future
+  const byte8 = bytes[8]!;
   let variant: UuidParsed['variant'];
-  if (variantBits === 0b00) variant = 'NCS';
-  else if (variantBits === 0b10) variant = 'Microsoft';
-  else if (variantBits === 0b11) variant = 'Future';
-  else variant = 'RFC4122';
+  if ((byte8 & 0x80) === 0) {
+    variant = 'NCS';
+  } else if ((byte8 & 0xc0) === 0x80) {
+    variant = 'RFC4122';
+  } else if ((byte8 & 0xe0) === 0xc0) {
+    variant = 'Microsoft';
+  } else {
+    variant = 'Future';
+  }
 
   const result: UuidParsed = {
     version,
@@ -120,7 +126,7 @@ function parseUuid(id: string): UuidParsed | null {
   if (version === 7) {
     let timestamp = 0n;
     for (let i = 0; i < 6; i++) {
-      timestamp = (timestamp << 8n) | BigInt(bytes[i]);
+      timestamp = (timestamp << 8n) | BigInt(bytes[i]!);
     }
     result.timestamp = new Date(Number(timestamp));
   }
