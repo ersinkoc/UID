@@ -93,7 +93,8 @@ describe('NanoID Plugin', () => {
       const count = 100;
 
       for (let i = 0; i < count; i++) {
-        ids.add(nanoid.custom({ alphabet: 'abc', size: 10 }));
+        // Use larger alphabet to avoid birthday paradox collisions
+        ids.add(nanoid.custom({ alphabet: 'abcdefghijklmnopqrstuvwxyz', size: 12 }));
       }
 
       expect(ids.size).toBe(count);
