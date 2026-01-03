@@ -36,6 +36,7 @@ website/node_modules/
 website/dist/
 website/.vite/
 website/build/
+!website/package-lock.json
 
 # Temporary
 tmp/
