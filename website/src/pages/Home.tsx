@@ -43,7 +43,7 @@ const algorithms = [
   { name: 'Snowflake', desc: 'Twitter-style 64-bit', color: 'bg-pink-500/10 text-pink-600 dark:text-pink-400' },
 ];
 
-export function Home({ onPageChange }: HomeProps) {
+export function Home({ onPageChange, isDark = true }: HomeProps) {
   return (
     <div>
       {/* Hero Section */}
@@ -161,6 +161,7 @@ uid.ulid();     // '01ARZ3NDEKTSV4RRFFQ69G5FAV'
 uid.nanoid();   // 'V1StGXR8_Z5jdHi6B-myT'`}
               filename="typescript"
               language="typescript"
+              isDark={isDark}
             />
           </div>
         </div>
@@ -215,6 +216,7 @@ uid.nanoid();   // 'V1StGXR8_Z5jdHi6B-myT'`}
             code={`npm install @oxog/uid`}
             language="bash"
             filename="terminal"
+            isDark={isDark}
           />
         </div>
       </section>

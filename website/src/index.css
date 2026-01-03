@@ -42,9 +42,13 @@
   min-width: 2.5em;
   padding-right: 1em;
   text-align: right;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(0, 0, 0, 0.3);
   user-select: none;
   flex-shrink: 0;
+}
+
+.dark .cs-line-number {
+  color: rgba(255, 255, 255, 0.3);
 }
 
 .cs-line-content {
@@ -54,10 +58,18 @@
 
 /* Highlighted lines */
 .cs-line-highlighted {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.dark .cs-line-highlighted {
   background: rgba(255, 255, 255, 0.05);
 }
 
 .cs-line-highlighted .cs-line-number {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.dark .cs-line-highlighted .cs-line-number {
   color: rgba(255, 255, 255, 0.5);
 }
 
@@ -67,6 +79,10 @@
 }
 
 .cs-line-focused {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.dark .cs-line-focused {
   background: rgba(255, 255, 255, 0.03);
 }
 

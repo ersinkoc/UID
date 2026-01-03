@@ -40,7 +40,7 @@ function App() {
   const renderPage = () => {
     switch (page) {
       case 'home':
-        return <Home onPageChange={handlePageChange} />;
+        return <Home onPageChange={handlePageChange} isDark={isDark} />;
       case 'getting-started':
         return <GettingStarted isDark={isDark} />;
       case 'api':
@@ -52,7 +52,7 @@ function App() {
       case 'playground':
         return <Playground isDark={isDark} />;
       default:
-        return <Home onPageChange={handlePageChange} />;
+        return <Home onPageChange={handlePageChange} isDark={isDark} />;
     }
   };
 
